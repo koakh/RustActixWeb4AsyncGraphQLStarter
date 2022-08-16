@@ -1,0 +1,56 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+# project vars
+HTTP_SERVER_URI = "0.0.0.0:8643"
+HTTP_SERVER_API_KEY = "override-secret-here"
+RUST_LOG = "trace,actix_server=trace,actix_web=trace"
+LOG_LEVEL = "DEBUG"
+LOGFILE_LEVEL= "DEBUG"
+# aes-gcm: when targeting modern x86/x86_64 CPUs, use the following RUSTFLAGS to take advantage of high performance AES-NI and CLMUL CPU intrinsics
+RUSTFLAGS = "-Ctarget-cpu=sandybridge -Ctarget-feature=+aes,+sse2,+sse4.1,+ssse3"
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+# dependencies = ["clean"]
+
+[tasks.release]
+command = "cargo"
+args = ["build", "-r"]
+# dependencies = ["clean"]
+# workspace = true
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+dependencies = ["clean"]
+
+[tasks.run]
+command = "cargo"
+args = ["run"]
+
+[tasks.watch]
+command = "cargo"
+args = ["watch", "-x", "run"]
+dependencies = ["clean"]
+
+# stub for args
+[tasks.echo]
+command = "echo"
+args = [ "${@}"]
+
+[tasks.my-flow]
+dependencies = [
+    "format",
+    "build",
+    "test"
+]

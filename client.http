@@ -1,0 +1,102 @@
+@host = localhost
+@port = 8643
+@baseUri = https://{{host}}:{{port}}
+@uri = {{baseUri}}/graphql
+
+@contentType = application/json
+@apiKey = override-secret-here
+
+### ping
+// @name ping
+
+GET {{baseUri}}/ping HTTP/1.1
+Content-Type: {{contentType}}
+
+### queryBooks
+// @name queryBooks
+
+POST {{uri}}
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+X-REQUEST-TYPE: GraphQL
+
+query {
+  books {
+    id
+    name
+    author
+  }
+}
+
+### queryBook
+// @name queryBook
+
+POST {{uri}}
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+X-REQUEST-TYPE: GraphQL
+
+query ($id: ID!) {
+  book(id: $id) {
+    id
+    name
+    author    
+  }
+}
+
+{
+  "id": 0
+}
+
+### mutationCreateBook
+// @name mutationCreateBook
+
+POST {{uri}}
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+X-REQUEST-TYPE: GraphQL
+
+mutation ($name: String!, $author: String!) {
+  createBook(name: $name, author: $author)
+}
+
+{
+  "name": "book001",
+  "author": "koakh"
+}
+
+### mutationDeleteBook
+// @name mutationDeleteBook
+
+POST {{uri}}
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+X-REQUEST-TYPE: GraphQL
+
+mutation ($id: ID!) {
+  deleteBook(id: $id)
+}
+
+{
+  "id": 1
+}
+
+### subscriptionBooks
+// @name subscriptionBooks
+
+POST {{uri}}
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+X-REQUEST-TYPE: GraphQL
+
+subscription {
+  books{
+      mutationType
+      id
+      book{
+        id
+        name
+        author
+      }
+    }
+}

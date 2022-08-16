@@ -1,0 +1,23 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# workspace crates
+books = { path = "../books" }
+common = { path = "../common" }
+# log
+log = "0.4.14"
+# graphql
+async-graphql = "4.0.8"
+async-graphql-actix-web = "4.0.8"
+# actix
+actix-web = { version = "4.0.1", default-features = false, features = ["macros", "openssl"] }
+actix-web-httpauth = "0.6.0"
+# https
+openssl = "0.10.38"
+# serde
+serde = { version = "1.0.136", features = ["derive", "rc"] }
