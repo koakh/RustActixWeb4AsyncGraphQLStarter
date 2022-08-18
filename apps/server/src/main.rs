@@ -54,12 +54,12 @@ async fn main() -> std::io::Result<()> {
   let log_level = config.log.log_level.as_ref().unwrap().to_owned();
   let log_file_level = config.log.log_file_level.as_ref().unwrap().to_owned();
   let log_file_path = config.log.log_file_path.as_ref().unwrap().to_owned();
-  let http_server_uri = config.server.http_server_uri.as_ref().unwrap().to_owned();
-  let http_server_enable_https = config.server.http_server_enable_https.as_ref().unwrap().to_owned();
-  let http_server_api_key = config.server.http_server_api_key.as_ref().unwrap().to_owned();
-  let cert_config_path = config.certificate.config_path.as_ref().unwrap().to_owned();
-  let cert_file_name_key = config.certificate.file_name_key.as_ref().unwrap().to_owned();
-  let cert_file_name_cert = config.certificate.file_name_cert.as_ref().unwrap().to_owned();
+  let server_uri = config.server.uri.as_ref().unwrap().to_owned();
+  let server_enable_https = config.server.enable_https.as_ref().unwrap().to_owned();
+  let server_api_key = config.server.api_key.as_ref().unwrap().to_owned();
+  let certificate_config_path = config.certificate.config_path.as_ref().unwrap().to_owned();
+  let certificate_file_name_key = config.certificate.file_name_key.as_ref().unwrap().to_owned();
+  let certificate_file_name_cert = config.certificate.file_name_cert.as_ref().unwrap().to_owned();
   // init log4rs
   init_log4rs(&log_file_path, &log_level, &log_file_level).expect("can't initialize log4rs logger");
 
@@ -68,7 +68,7 @@ async fn main() -> std::io::Result<()> {
   // Err(AuthenticationError::from(config).into())
   async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, ActixError> {
     let config = get_config();
-    let http_server_api_key = config.server.http_server_api_key.as_ref().unwrap().to_owned();
+    let http_server_api_key = config.server.api_key.as_ref().unwrap().to_owned();
     if credentials.token() == http_server_api_key {
       Ok(req)
     } else {
@@ -102,26 +102,26 @@ async fn main() -> std::io::Result<()> {
   })
   .keep_alive(Duration::from_secs(HTTP_SERVER_KEEP_ALIVE));
 
-  if http_server_enable_https {
+  if server_enable_https {
     info!(
       "start {} graphql server at: '{}', apiKey: '{}...', certificates '{}', '{}'",
       APP_NAME,
-      http_server_uri,
-      &http_server_api_key[..10],
-      cert_file_name_key,
-      cert_file_name_cert,
+      server_uri,
+      &server_api_key[..10],
+      certificate_file_name_key,
+      certificate_file_name_cert,
     );
     // prepare ssl builder
-    let cert_file_path_key = format!("{}/{}", cert_config_path, cert_file_name_key);
-    let cert_file_path_cert = format!("{}/{}", cert_config_path, cert_file_name_cert);
+    let certificate_file_path_key = format!("{}/{}", certificate_config_path, certificate_file_name_key);
+    let certificate_file_path_cert = format!("{}/{}", certificate_config_path, certificate_file_name_cert);
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    builder.set_private_key_file(cert_file_path_key.clone(), SslFiletype::PEM).unwrap();
-    builder.set_certificate_chain_file(cert_file_path_cert.clone()).unwrap();
+    builder.set_private_key_file(certificate_file_path_key.clone(), SslFiletype::PEM).unwrap();
+    builder.set_certificate_chain_file(certificate_file_path_cert.clone()).unwrap();
     // start server
-    http_server.bind_openssl(http_server_uri, builder)?.run().await
+    http_server.bind_openssl(server_uri, builder)?.run().await
   } else {
-    info!("start {} graphql server at: '{}', apiKey: '{}...'", APP_NAME, &http_server_uri, &http_server_api_key[..10]);
+    info!("start {} graphql server at: '{}', apiKey: '{}...'", APP_NAME, &server_uri, &server_api_key[..10]);
     // start server
-    http_server.bind(&http_server_uri)?.run().await
+    http_server.bind(&server_uri)?.run().await
   }
 }

@@ -26,11 +26,9 @@ static CONFIG: Lazy<Config> = Lazy::new(|| Config::new().expect("Unable to retri
 /// Server config
 #[derive(Debug, Deserialize)]
 pub struct Server {
-  pub http_server_uri: Option<String>,
-  pub http_server_enable_https: Option<bool>,
-  pub http_server_api_key: Option<String>,
-  pub value_b_c_d: Option<String>,
-  pub http_server_c_d: Option<String>,
+  pub uri: Option<String>,
+  pub enable_https: Option<bool>,
+  pub api_key: Option<String>,
 }
 
 /// Certificates config
@@ -49,103 +47,11 @@ pub struct Log {
   pub log_file_path: Option<String>,
 }
 
-// pub struct Config {
-//   pub http_server_uri: String,
-//   pub http_server_enable_https: bool,
-//   pub http_server_api_key: String,
-//   pub certs_config_path: String,
-//   pub certs_file_name_cert: String,
-//   pub certs_file_name_key: String,
-//   pub log_file_level: String,
-//   pub log_file_path: String,
-//   pub log_level: String,
-// }
-
-// /// Database pool config
-// #[derive(Debug, Deserialize)]
-// pub struct DbPool {
-//   /// Database pool min
-//   pub min: Option<i16>,
-//   /// Database pool max
-//   pub max: Option<i16>,
-// }
-
-// /// Database config
-// #[derive(Debug, Deserialize)]
-// pub struct Database {
-//   /// Database hostname/IP
-//   pub hostname: String,
-//   /// Database username
-//   pub username: String,
-//   /// Database password
-//   pub password: String,
-//   /// Database name
-//   pub name: String,
-//   /// Database port
-//   pub port: u16,
-//   /// Full database url
-//   pub url: String,
-//   /// Database debug logging
-//   pub debug: bool,
-//   /// Database pool config
-//   pub pool: DbPool,
-// }
-
-// /// Redis config
-// #[derive(Debug, Deserialize)]
-// pub struct Redis {
-//   /// Redis url
-//   pub url: String,
-// }
-
-// /// Auth client config
-// #[derive(Debug, Deserialize)]
-// pub struct AuthClient {
-//   /// OAuth2 client id
-//   pub id: Option<String>,
-//   /// OAuth2 client secret
-//   pub secret: Option<String>,
-// }
-
-// /// Auth test user config
-// #[derive(Debug, Deserialize)]
-// pub struct AuthTestUser {
-//   /// Test user username
-//   pub username: Option<String>,
-//   /// Test user password
-//   pub password: Option<String>,
-// }
-
-// /// Auth test config
-// #[derive(Debug, Deserialize)]
-// pub struct AuthTest {
-//   /// Auth test user config
-//   pub user: AuthTestUser,
-//   /// Auth alt test user config
-//   pub alt: AuthTestUser,
-// }
-
-// /// Auth config
-// #[derive(Debug, Deserialize)]
-// pub struct Auth {
-//   /// OAuth2 url
-//   pub url: String,
-//   /// OAuth2 audience
-//   pub audience: String,
-//   /// Auth client config
-//   pub client: AuthClient,
-//   /// Auth test config
-//   pub test: AuthTest,
-// }
-
 /// Application Config
 #[derive(Debug, Deserialize)]
 pub struct Config {
   /// the application's run mode (typically "development" or "production")
   pub run_mode: String,
-  // TODO:
-  /// the port to bind to
-  pub port: u16,
   // server
   pub server: Server,
   // certificates
@@ -155,7 +61,7 @@ pub struct Config {
 }
 
 impl Config {
-  /// Create a new Config by merging in various sources
+  /// create a new Config by merging in various sources
   pub fn new() -> Result<Self> {
     let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "development".to_string());
 
@@ -189,14 +95,14 @@ impl Config {
       config.log.log_file_level = Some(DEFAULT_LOG_FILE_LEVEL.to_string())
     };
     // env vars: server
-    if config.server.http_server_uri.is_none() {
-      config.server.http_server_uri = Some(DEFAULT_HTTP_SERVER_URI.to_string())
+    if config.server.uri.is_none() {
+      config.server.uri = Some(DEFAULT_HTTP_SERVER_URI.to_string())
     };
-    if config.server.http_server_enable_https.is_none() {
-      config.server.http_server_enable_https = Some(DEFAULT_HTTP_SERVER_ENABLE_HTTPS)
+    if config.server.enable_https.is_none() {
+      config.server.enable_https = Some(DEFAULT_HTTP_SERVER_ENABLE_HTTPS)
     };
-    if config.server.http_server_api_key.is_none() {
-      config.server.http_server_api_key = Some(DEFAULT_HTTP_SERVER_API_KEY.to_string())
+    if config.server.api_key.is_none() {
+      config.server.api_key = Some(DEFAULT_HTTP_SERVER_API_KEY.to_string())
     };
     // env vars: certificate
     if config.certificate.config_path.is_none() {

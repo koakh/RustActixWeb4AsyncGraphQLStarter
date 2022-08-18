@@ -22,10 +22,7 @@
       "args": [],
       "cwd": "${workspaceFolder}/apps/server",
       "env": {
-        "SERVER_HTTP_SERVER_API_KEY" : "override-secret-here-env",
-        "SERVER_HTTP_SERVER_URI" : "override-secret-here-env",
-        "SERVER_VALUE_B_C_D" : "override-secret-here-env",
-        "SERVER_HTTP_SERVER_C_D" : "override-secret-here-env",
+        "SERVER_URI": "0.0.0.0:8643"
       }
     },
     {
