@@ -1,7 +1,5 @@
 [workspace]
-
 members = [
-    "server",
-    "common",
-    "books",
+  "apps/*",
+  "libs/*",
 ]

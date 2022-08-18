@@ -11,7 +11,7 @@ use log4rs::{
 };
 use std::fs;
 
-pub fn init_log4rs(default_log_file_path: &String, default_log_level: &String, default_logfile_level: &String) -> Result<(), SetLoggerError> {
+pub fn init_log4rs(default_log_file_path: &String, default_log_level: &String, default_log_file_level: &String) -> Result<(), SetLoggerError> {
   // closure to get LevelFilter from env string
   let get_log_level = |env_level: String| -> LevelFilter {
     match env_level.to_uppercase().as_str() {
@@ -25,7 +25,7 @@ pub fn init_log4rs(default_log_file_path: &String, default_log_level: &String, d
     }
   };
   let log_level = get_log_level(default_log_level.into());
-  let logfile_level = get_log_level(default_logfile_level.into());
+  let logfile_level = get_log_level(default_log_file_level.into());
   // always delete old log
   if file_exists(default_log_file_path.as_str()) {
     debug!("removing old log file:{}", default_log_file_path);

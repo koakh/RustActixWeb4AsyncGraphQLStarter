@@ -12,14 +12,11 @@ use async_graphql::{
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use books::{BooksSchema, MutationRoot, QueryRoot, Storage, SubscriptionRoot};
-use common::logger::init_log4rs;
+use common::{config::get_config, logger::init_log4rs};
 use log::{error, info};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use serde::{Deserialize, Serialize};
-use server::constants::{
-  APP_NAME, DEFAULT_CERT_FILE_NAME_CERT, DEFAULT_CERT_FILE_NAME_KEY, DEFAULT_CONFIG_PATH_SSL, DEFAULT_HTTP_SERVER_API_KEY, DEFAULT_HTTP_SERVER_ENABLE_HTTPS, DEFAULT_HTTP_SERVER_URI,
-  DEFAULT_LOGFILE_LEVEL, DEFAULT_LOG_FILE_PATH, DEFAULT_LOG_LEVEL, GRAPHQL_PATH, HTTP_SERVER_KEEP_ALIVE, PLAYGROUND_PATH,
-};
+use server::constants::{APP_NAME, DEFAULT_HTTP_SERVER_API_KEY, GRAPHQL_PATH, HTTP_SERVER_KEEP_ALIVE, PLAYGROUND_PATH};
 use std::{env, time::Duration};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -51,19 +48,20 @@ async fn health_check(_: HttpRequest) -> Result<web::Json<MessageResponse>> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-  // init defaults
-  let default_log_file_path = std::env::var("LOG_FILE_PATH").unwrap_or_else(|_| DEFAULT_LOG_FILE_PATH.to_string());
-  let default_log_level = std::env::var("LOG_LEVEL").unwrap_or_else(|_| DEFAULT_LOG_LEVEL.to_string());
-  let default_logfile_level = std::env::var("LOGFILE_LEVEL").unwrap_or_else(|_| DEFAULT_LOGFILE_LEVEL.to_string());
+  // env vars: log
+  let config = get_config();
+  // // init local log variables
+  let log_level = config.log.log_level.as_ref().unwrap().to_owned();
+  let log_file_level = config.log.log_file_level.as_ref().unwrap().to_owned();
+  let log_file_path = config.log.log_file_path.as_ref().unwrap().to_owned();
+  let http_server_uri = config.server.http_server_uri.as_ref().unwrap().to_owned();
+  let http_server_enable_https = config.server.http_server_enable_https.as_ref().unwrap().to_owned();
+  let http_server_api_key = config.server.http_server_api_key.as_ref().unwrap().to_owned();
+  let cert_config_path = config.certificate.config_path.as_ref().unwrap().to_owned();
+  let cert_file_name_key = config.certificate.file_name_key.as_ref().unwrap().to_owned();
+  let cert_file_name_cert = config.certificate.file_name_cert.as_ref().unwrap().to_owned();
   // init log4rs
-  init_log4rs(&default_log_file_path, &default_log_level, &default_logfile_level).expect("can't initialize logger");
-  // env vars
-  let http_server_uri = env::var("HTTP_SERVER_URI").unwrap_or_else(|_| DEFAULT_HTTP_SERVER_URI.to_string());
-  let config_path_ssl = env::var("CONFIG_PATH_SSL").unwrap_or_else(|_| DEFAULT_CONFIG_PATH_SSL.to_string());
-  let http_server_enable_https = env::var("HTTP_SERVER_ENABLE_HTTPS").unwrap_or_else(|_| DEFAULT_HTTP_SERVER_ENABLE_HTTPS.to_string());
-  let cert_file_name_key = env::var("CERT_FILE_NAME_KEY").unwrap_or_else(|_| DEFAULT_CERT_FILE_NAME_KEY.to_string());
-  let cert_file_name_cert = env::var("CERT_FILE_NAME_CERT").unwrap_or_else(|_| DEFAULT_CERT_FILE_NAME_CERT.to_string());
-  let http_server_api_key = env::var("HTTP_SERVER_API_KEY").unwrap_or_else(|_| DEFAULT_HTTP_SERVER_API_KEY.to_string());
+  init_log4rs(&log_file_path, &log_level, &log_file_level).expect("can't initialize log4rs logger");
 
   // authentication validator
   // required to implement ResponseError in src/app/errors.rs else we have a error
@@ -103,26 +101,26 @@ async fn main() -> std::io::Result<()> {
   })
   .keep_alive(Duration::from_secs(HTTP_SERVER_KEEP_ALIVE));
 
-  if http_server_enable_https.eq("true") {
+  if http_server_enable_https {
     info!(
       "start {} graphql server at: '{}', apiKey: '{}...', certificates '{}', '{}'",
       APP_NAME,
       http_server_uri,
       &http_server_api_key[..10],
       cert_file_name_key,
-      cert_file_name_cert
+      cert_file_name_cert,
     );
     // prepare ssl builder
-    let cert_file_name_key = format!("{}/{}", config_path_ssl, cert_file_name_key);
-    let cert_file_name_cert = format!("{}/{}", config_path_ssl, cert_file_name_cert);
+    let cert_file_path_key = format!("{}/{}", cert_config_path, cert_file_name_key);
+    let cert_file_path_cert = format!("{}/{}", cert_config_path, cert_file_name_cert);
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    builder.set_private_key_file(cert_file_name_key.clone(), SslFiletype::PEM).unwrap();
-    builder.set_certificate_chain_file(cert_file_name_cert.clone()).unwrap();
+    builder.set_private_key_file(cert_file_path_key.clone(), SslFiletype::PEM).unwrap();
+    builder.set_certificate_chain_file(cert_file_path_cert.clone()).unwrap();
     // start server
     http_server.bind_openssl(http_server_uri, builder)?.run().await
   } else {
-    info!("start {} graphql server at: '{}', apiKey: '{}...'", APP_NAME, http_server_uri, &http_server_api_key[..10]);
+    info!("start {} graphql server at: '{}', apiKey: '{}...'", APP_NAME, &http_server_uri, &http_server_api_key[..10]);
     // start server
-    http_server.bind(http_server_uri)?.run().await
+    http_server.bind(&http_server_uri)?.run().await
   }
 }

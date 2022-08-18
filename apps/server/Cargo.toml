@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 # workspace crates
-books = { path = "../books" }
-common = { path = "../common" }
+books = { path = "../../libs/books/" }
+common = { path = "../../libs/common" }
 # log
 log = "0.4.14"
 # graphql

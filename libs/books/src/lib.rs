@@ -1,8 +1,6 @@
 use std::{sync::Arc, time::Duration};
-
 use async_graphql::{Context, Enum, Error as AsyncGraphQLError, Object, Result, Schema, Subscription, ID};
 use futures_util::{lock::Mutex, Stream, StreamExt};
-// use simple_broker::SimpleBroker;
 use common::simple_broker::SimpleBroker;
 use slab::Slab;
 

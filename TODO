@@ -1,0 +1,15 @@
+From RustGraphQLSeaOrmExampleCasterApi:
+  ☐ create a moke vector of books
+  ☐ whole `libs/utils` is awesome with some many good things figment etc
+  ☐ libs/testing
+  ☐ trait 
+  libs/shows/src/episodes_service.rs
+    pub trait EpisodesService: Sync + Send {
+  libs/shows/src/shows_service.rs
+    pub trait ShowsService: Sync + Send {
+  ☐ oauth2 auth
+    libs/auth
+
+DataStore Implementation:
+  ☐ use ScyllaDb
+  ☐ use SurrealDb
