@@ -29,6 +29,8 @@ pub struct Server {
   pub http_server_uri: Option<String>,
   pub http_server_enable_https: Option<bool>,
   pub http_server_api_key: Option<String>,
+  pub value_b_c_d: Option<String>,
+  pub http_server_c_d: Option<String>,
 }
 
 /// Certificates config
@@ -168,26 +170,14 @@ impl Config {
       .merge(
         // support the nested structure of the config manually
         Env::raw()
-          // TODO: add env variables here like SERVER_, CERTIFICATE_, LOG_
-          // split the Database variables
-          .map(|key| key.as_str().replace("DATABASE_POOL_", "DATABASE.POOL.").into())
-          .map(|key| key.as_str().replace("DATABASE_", "DATABASE.").into())
-          // split the Redis variables
-          .map(|key| key.as_str().replace("REDIS_", "REDIS.").into())
-          // split the Auth variables
-          .map(|key| key.as_str().replace("AUTH_TEST_USER_", "AUTH.TEST.USER.").into())
-          .map(|key| key.as_str().replace("AUTH_TEST_ALT_", "AUTH.TEST.ALT.").into())
-          .map(|key| key.as_str().replace("AUTH_CLIENT_", "AUTH.CLIENT.").into())
-          .map(|key| key.as_str().replace("AUTH_", "AUTH.").into()),
+          .map(|key| key.as_str().replace("SERVER_", "SERVER.").into())
+          .map(|key| key.as_str().replace("CERTIFICATE_", "CERTIFICATE.").into())
+          .map(|key| key.as_str().replace("LOG_", "LOG.").into())
       )
       // serialize and freeze
       .extract()?;
 
     // always use defaults if variables are not defined in config files or env variables
-    if config.server.http_server_uri.is_none() {
-      config.server.http_server_uri = Some(DEFAULT_HTTP_SERVER_URI.to_string());
-    }
-
     // init log variables
     if config.log.log_file_path.is_none() {
       config.log.log_file_path = Some(DEFAULT_LOG_FILE_PATH.to_string())

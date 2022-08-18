@@ -16,8 +16,8 @@ use common::{config::get_config, logger::init_log4rs};
 use log::{error, info};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use serde::{Deserialize, Serialize};
-use server::constants::{APP_NAME, DEFAULT_HTTP_SERVER_API_KEY, GRAPHQL_PATH, HTTP_SERVER_KEEP_ALIVE, PLAYGROUND_PATH};
-use std::{env, time::Duration};
+use server::constants::{APP_NAME, GRAPHQL_PATH, HTTP_SERVER_KEEP_ALIVE, PLAYGROUND_PATH};
+use std::{time::Duration};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MessageResponse {
@@ -67,7 +67,8 @@ async fn main() -> std::io::Result<()> {
   // required to implement ResponseError in src/app/errors.rs else we have a error
   // Err(AuthenticationError::from(config).into())
   async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, ActixError> {
-    let http_server_api_key = env::var("HTTP_SERVER_API_KEY").unwrap_or_else(|_| DEFAULT_HTTP_SERVER_API_KEY.to_string());
+    let config = get_config();
+    let http_server_api_key = config.server.http_server_api_key.as_ref().unwrap().to_owned();
     if credentials.token() == http_server_api_key {
       Ok(req)
     } else {

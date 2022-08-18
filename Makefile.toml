@@ -2,6 +2,8 @@
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
 # project vars
 HTTP_SERVER_API_KEY = "override-secret-here"
+# TODO: 
+SERVER_HTTP_SERVER_API_KEY = "override-secret-here-NEW-ONE"
 HTTP_SERVER_URI = "0.0.0.0:8643"
 LOGFILE_LEVEL = "DEBUG"
 LOG_LEVEL = "DEBUG"

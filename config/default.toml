@@ -5,8 +5,9 @@ run_mode = "development"
 
 [server]
 http_server_uri = "0.0.0.0:8643"
-# http_server_enable_https = true
-# http_server_api_key = "ENKpqTvRw3ybXvMyWwf0DBIXeAS2JRTHtTsEq1jqoAyVjpI7l9iaaPlbnvAf0ReQ"
+http_server_enable_https = true
+http_server_api_key = "override-secret-here-toml"
+value_b_c =  "override-secret-here-toml"
 
 [certificate]
 # config_path = "./config/ssl"
